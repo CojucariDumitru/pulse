@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Secrets — real values live in Render/Vercel dashboards
+.env
+.env.local
+.env*.local
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# Logs / OS / editor
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+coverage/
+.cache/

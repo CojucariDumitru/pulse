@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0a0a0b;
+  --coal: #141417;
+  --steel: #26262b;
+  --volt: #ccff00;
+  --ember: #ff5c2b;
+  --bone: #f4f4f0;
+  --ash: #8a8a92;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink text-bone font-body antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--volt);
+    color: var(--ink);
+  }
+
+  h1, h2, h3 {
+    @apply font-display;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--ink);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--steel);
+    border-radius: 6px;
+    border: 2px solid var(--ink);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--volt);
+  }
+}
+
+@layer components {
+  /* mono eyebrow label */
+  .label {
+    @apply font-mono uppercase tracking-[0.22em] text-xs;
+  }
+
+  /* volt CTA */
+  .btn-volt {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-volt text-ink
+           font-display font-bold text-sm uppercase tracking-wider px-7 py-3.5
+           transition-all duration-200 hover:shadow-volt hover:-translate-y-0.5
+           active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-steel text-bone
+           font-display font-bold text-sm uppercase tracking-wider px-7 py-3.5
+           transition-all duration-200 hover:border-volt hover:text-volt active:translate-y-px;
+  }
+
+  /* raised card */
+  .card {
+    @apply rounded-2xl bg-coal border border-steel;
+  }
+}
+
+@layer utilities {
+  /* faint grid backdrop for dark sections */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .glow-volt {
+    text-shadow: 0 0 24px rgba(204, 255, 0, 0.5);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .pause-hover:hover * {
+    animation-play-state: paused;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--volt);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

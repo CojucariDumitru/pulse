@@ -1,0 +1,63 @@
+# PULSE API — Render Blueprint
+# Deploy: Render Dashboard → New → Blueprint → pick this repo.
+#
+# SECURITY: secrets are NOT in this file (public repo). Vars marked
+# `sync: false` are entered once in the Render dashboard. Values:
+#   DATABASE_URL       → the Neon `pulse` database connection string
+#   RESEND_API_KEY     → Resend key
+#   CLOUDINARY_API_SECRET → Cloudinary secret
+#   GEMINI_API_KEY     → Google AI Studio key (AI coach notes; optional)
+#   STRIPE_* keys      → optional; leave unset for demo-mode checkout
+
+services:
+  - type: web
+    name: pulse-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: server
+    buildCommand: npm install --include=dev && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && node dist/index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+
+      # --- Secrets (dashboard-set) ---
+      - key: DATABASE_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+      # --- Optional Stripe (unset = demo checkout) ---
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+      # --- Generated ---
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+      # --- Non-secret config ---
+      - key: EMAIL_FROM
+        value: hello@pulsestudio.app
+      - key: STUDIO_EMAIL
+        value: hello@pulsestudio.app
+      - key: EMAIL_DEMO_TO
+        value: waxent@sasuke.ru
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dozr400tl
+      - key: CLOUDINARY_API_KEY
+        value: "782576434646222"
+      - key: CLIENT_URL
+        value: https://pulse-studio.vercel.app
