@@ -60,4 +60,4 @@ services:
       - key: CLOUDINARY_API_KEY
         value: "782576434646222"
       - key: CLIENT_URL
-        value: https://pulse-studio.vercel.app
+        value: https://pulse-studio-inky.vercel.app

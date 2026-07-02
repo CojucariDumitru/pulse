@@ -8,9 +8,9 @@ Full-stack TypeScript monorepo — React + Vite storefront, Express + Prisma API
 Postgres (Neon), Stripe Billing, Resend email, Cloudinary images, Gemini AI.
 
 ### 🔗 Live
-- **Site:** https://pulse-studio.vercel.app
+- **Site:** https://pulse-studio-inky.vercel.app
 - **API:** https://pulse-api.onrender.com/api/health
-- **Admin:** https://pulse-studio.vercel.app/admin — `admin@pulsestudio.app` / `Pulse2024!`
+- **Admin:** https://pulse-studio-inky.vercel.app/admin — `admin@pulsestudio.app` / `Pulse2024!`
 - **Demo member:** `demo@pulsestudio.app` / `Pulse2024!` (active Unlimited membership)
 
 ---
