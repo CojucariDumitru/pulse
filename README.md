@@ -9,7 +9,7 @@ Postgres (Neon), Stripe Billing, Resend email, Cloudinary images, Gemini AI.
 
 ### 🔗 Live
 - **Site:** https://pulse-studio-inky.vercel.app
-- **API:** https://pulse-api.onrender.com/api/health
+- **API:** https://pulse-api-6tt3.onrender.com/api/health
 - **Admin:** https://pulse-studio-inky.vercel.app/admin — `admin@pulsestudio.app` / `Pulse2024!`
 - **Demo member:** `demo@pulsestudio.app` / `Pulse2024!` (active Unlimited membership)
 
