@@ -1,87 +1,142 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowRight, Zap, Clock, MapPin, Phone, Dumbbell, Sparkles } from 'lucide-react';
-import { fetchClasses, fetchPlans } from '../api/endpoints';
+import { ArrowUpRight, ArrowRight } from 'lucide-react';
+import { fetchClasses, fetchSchedule, fetchPlans } from '../api/endpoints';
 import { Img } from '../components/ui/Img';
-import { img } from '../lib/img';
+import { img, cld } from '../lib/img';
 import { SITE, MAPS_EMBED, MAPS_DIRECTIONS } from '../lib/site';
-import { INTENSITY_LABEL } from '../lib/types';
+import type { ClassType } from '../lib/types';
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
+/* ─────────────────────────── hero ─────────────────────────── */
+
+const reveal = {
+  hidden: { y: '110%' },
   show: (i: number) => ({
-    opacity: 1,
     y: 0,
-    transition: { delay: 0.08 * i, duration: 0.55, ease: [0.2, 0.65, 0.3, 0.9] as const },
+    transition: { delay: 0.15 + i * 0.11, duration: 0.9, ease: [0.16, 1, 0.3, 1] as const },
   }),
 };
 
-const MARQUEE = ['SPIN', 'HIIT', 'STRENGTH', 'YOGA FLOW', 'NO EGO', 'ALL OUTPUT'];
+function HeroLine({ children, i }: { children: React.ReactNode; i: number }) {
+  return (
+    <span className="block overflow-hidden">
+      <motion.span initial="hidden" animate="show" custom={i} variants={reveal} className="block">
+        {children}
+      </motion.span>
+    </span>
+  );
+}
+
+function NextClassChip() {
+  const { data } = useQuery({ queryKey: ['schedule'], queryFn: () => fetchSchedule({ days: 2 }) });
+  const next = data?.find((s) => new Date(s.startsAt) > new Date());
+  if (!next) return null;
+
+  const time = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }).format(new Date(next.startsAt));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.1, duration: 0.7 }}
+    >
+      <Link
+        to="/schedule"
+        className="group inline-flex items-center gap-4 border border-white/15 bg-ink/60 backdrop-blur-md pl-5 pr-4 py-3.5 hover:border-volt/60 transition-colors"
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-volt animate-pulse-dot" />
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-bone/90">
+          Next class — {next.classType.name} · {time} · {next.spotsLeft} spots
+        </span>
+        <ArrowUpRight size={14} className="text-ash group-hover:text-volt transition-colors" />
+      </Link>
+    </motion.div>
+  );
+}
+
+const TICKER = ['SPIN', 'HIIT', 'STRENGTH', 'YOGA FLOW', 'NO EGO', 'ALL OUTPUT', 'SOHO NYC'];
 
 function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-grid">
-      {/* volt ambient glow */}
-      <div className="absolute -top-32 right-[-15%] w-[55vw] h-[55vw] rounded-full bg-[radial-gradient(circle,rgba(204,255,0,0.12)_0%,transparent_65%)] pointer-events-none" />
+    <section className="relative min-h-screen flex flex-col justify-end overflow-hidden">
+      {/* full-bleed image */}
+      <div className="absolute inset-0">
+        <Img
+          src={cld('class-spin', 'c_fill,g_auto,w_2000,h_1300')}
+          alt="Rhythm spin at PULSE"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/25" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/70 via-transparent to-transparent" />
+      </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5 pt-28 pb-16 grid lg:grid-cols-2 gap-12 items-center w-full">
-        <div>
-          <motion.p initial="hidden" animate="show" custom={0} variants={fadeUp} className="label text-volt mb-5 flex items-center gap-2">
-            <Zap size={14} /> Boutique studio · SoHo NYC
-          </motion.p>
-          <h1 className="font-display font-extrabold leading-[0.95] text-6xl sm:text-7xl lg:text-8xl">
-            {['FIND', 'YOUR'].map((w, i) => (
-              <motion.span key={w} initial="hidden" animate="show" custom={i + 1} variants={fadeUp} className="block">
-                {w}
-              </motion.span>
-            ))}
-            <motion.span initial="hidden" animate="show" custom={3} variants={fadeUp} className="block text-volt glow-volt">
-              RHYTHM.
-            </motion.span>
-          </h1>
-          <motion.p initial="hidden" animate="show" custom={4} variants={fadeUp} className="mt-6 text-ash text-lg max-w-md leading-relaxed">
+      {/* top-right vertical meta */}
+      <div className="absolute top-28 right-6 md:right-10 hidden lg:flex flex-col items-end gap-1.5 z-10">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-bone/50">Est. 2024</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-bone/50">40.723° N / 74.001° W</p>
+      </div>
+
+      {/* content — bottom-left editorial */}
+      <div className="relative z-10 mx-auto max-w-[1600px] w-full px-6 md:px-10 pb-24 pt-40">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.8 }}
+          className="label text-volt mb-6"
+        >
+          Boutique training — SoHo, New York
+        </motion.p>
+
+        <h1 className="display text-[16vw] md:text-[11.5vw] lg:text-[10vw] max-w-[12ch]">
+          <HeroLine i={0}>Find</HeroLine>
+          <HeroLine i={1}>your</HeroLine>
+          <HeroLine i={2}>
+            <span className="text-volt">rhythm.</span>
+          </HeroLine>
+        </h1>
+
+        <div className="mt-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <motion.p
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.75, duration: 0.7 }}
+            className="text-bone/70 text-base md:text-lg max-w-sm leading-relaxed"
+          >
             Rhythm spin, HIIT, coached strength and yoga flow — 45 minutes at a time, in a room
-            that feels more like a club than a gym.
+            that hits like a club.
           </motion.p>
-          <motion.div initial="hidden" animate="show" custom={5} variants={fadeUp} className="mt-9 flex flex-wrap gap-4">
-            <Link to="/schedule" className="btn-volt">
-              Book a class <ArrowRight size={17} />
-            </Link>
-            <Link to="/program" className="btn-ghost">
-              <Sparkles size={16} /> Free 12-week program
-            </Link>
-          </motion.div>
+          <NextClassChip />
         </div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.35, duration: 0.7 }}
-          className="relative hidden lg:block"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.7 }}
+          className="mt-10 flex flex-wrap gap-4"
         >
-          <div className="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(circle,rgba(204,255,0,0.25)_0%,transparent_70%)] blur-2xl" />
-          <div className="relative animate-floaty">
-            <Img
-              src={img.square('hero', 900)}
-              alt="Training at PULSE"
-              className="w-full aspect-square rounded-[2rem] border border-steel shadow-lift"
-            />
-            <div className="absolute -bottom-4 -left-4 card px-5 py-3 flex items-center gap-3 shadow-lift">
-              <span className="w-2.5 h-2.5 rounded-full bg-volt animate-pulse" />
-              <span className="font-mono text-xs text-bone">22 classes this week</span>
-            </div>
-          </div>
+          <Link to="/schedule" className="btn-volt">
+            Book a class
+          </Link>
+          <Link to="/program" className="btn-line">
+            Free 12-week program
+          </Link>
         </motion.div>
       </div>
 
-      {/* marquee */}
-      <div className="absolute bottom-0 inset-x-0 border-t border-steel bg-ink/80 backdrop-blur py-3 overflow-hidden pause-hover">
+      {/* ticker */}
+      <div className="relative z-10 border-t border-white/10 bg-ink/70 backdrop-blur-sm py-4 overflow-hidden pause-hover">
         <div className="flex w-max animate-marquee">
-          {[...MARQUEE, ...MARQUEE, ...MARQUEE, ...MARQUEE].map((w, i) => (
-            <span key={i} className="flex items-center whitespace-nowrap font-display font-bold text-lg tracking-[0.2em] text-ash/70">
-              {w}
-              <span className="mx-6 text-volt">⚡</span>
+          {[...TICKER, ...TICKER, ...TICKER].map((w, i) => (
+            <span key={i} className="flex items-center whitespace-nowrap">
+              <span className="font-mono text-xs uppercase tracking-[0.3em] text-bone/50">{w}</span>
+              <span className="mx-8 w-1 h-1 rounded-full bg-volt/70 inline-block" />
             </span>
           ))}
         </div>
@@ -90,137 +145,265 @@ function Hero() {
   );
 }
 
+/* ─────────────────────── manifesto ─────────────────────── */
+
+function Manifesto() {
+  return (
+    <section className="py-28 md:py-40 border-b hairline">
+      <div className="mx-auto max-w-[1600px] px-6 md:px-10 grid lg:grid-cols-12 gap-10">
+        <p className="label text-ash lg:col-span-3">The idea</p>
+        <p
+          className="font-display font-bold text-3xl md:text-5xl lg:col-span-9 max-w-4xl leading-[1.08] tracking-tight"
+          style={{ fontStretch: '105%' }}
+        >
+          Forty-five minutes. Zero filler. Coaches who actually coach, music that actually moves
+          you, and a room where <span className="text-volt">effort is the only flex.</span>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────── classes — editorial rows ─────────────────────── */
+
+function ClassRow({ ct, index }: { ct: ClassType; index: number }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <Link
+      to="/schedule"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="group relative block border-b hairline"
+    >
+      <div className="mx-auto max-w-[1600px] px-6 md:px-10 py-10 md:py-14 flex items-center gap-6 md:gap-12">
+        <span className="font-mono text-xs text-ash w-8 shrink-0">0{index + 1}</span>
+
+        <h3 className="display text-4xl md:text-7xl flex-1 transition-colors duration-300 group-hover:text-volt">
+          {ct.name}
+        </h3>
+
+        <div className="hidden md:flex flex-col items-end gap-1 shrink-0 text-right">
+          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-ash">
+            {ct.intensity.replace('_', ' ')}
+          </span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-ash">
+            {ct.durationMin} min
+          </span>
+        </div>
+
+        <ArrowRight
+          size={28}
+          className="shrink-0 text-ash transition-all duration-300 group-hover:text-volt group-hover:translate-x-2"
+        />
+      </div>
+
+      {/* floating image reveal (desktop) */}
+      <motion.div
+        className="hidden lg:block absolute right-[16%] top-1/2 z-10 pointer-events-none"
+        initial={false}
+        animate={
+          hover
+            ? { opacity: 1, y: '-50%', rotate: -3, scale: 1 }
+            : { opacity: 0, y: '-42%', rotate: 0, scale: 0.92 }
+        }
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <Img
+          src={ct.image}
+          alt={ct.name}
+          fallbackLabel={ct.name}
+          className="w-72 h-48 object-cover shadow-lift"
+        />
+      </motion.div>
+    </Link>
+  );
+}
+
 function Classes() {
   const { data } = useQuery({ queryKey: ['classes'], queryFn: fetchClasses });
   const classTypes = data?.classTypes ?? [];
 
   return (
-    <section id="classes" className="scroll-mt-24 py-24 bg-ink">
-      <div className="mx-auto max-w-7xl px-5">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
-          <div>
-            <p className="label text-volt mb-3">The lineup</p>
-            <h2 className="font-display font-extrabold text-5xl md:text-6xl">Four ways to move.</h2>
+    <section id="classes" className="scroll-mt-20">
+      <div className="mx-auto max-w-[1600px] px-6 md:px-10 pt-24 md:pt-32">
+        <div className="section-head">
+          <div className="flex items-baseline gap-6">
+            <span className="font-mono text-xs text-volt">01</span>
+            <h2 className="display text-4xl md:text-6xl">The lineup</h2>
           </div>
-          <Link to="/schedule" className="label text-ash hover:text-volt transition-colors flex items-center gap-2">
-            Full schedule <ArrowRight size={14} />
+          <Link to="/schedule" className="label text-ash hover:text-volt transition-colors hidden sm:inline-flex items-center gap-2">
+            Full schedule <ArrowUpRight size={13} />
           </Link>
         </div>
+      </div>
 
-        {classTypes.length === 0 && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="card h-96 animate-pulse" />
-            ))}
-          </div>
-        )}
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {classTypes.map((ct, i) => {
-            return (
-              <motion.div
-                key={ct.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ delay: i * 0.08, duration: 0.5 }}
-                className="group card overflow-hidden hover:border-volt/50 transition-colors"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Img
-                    src={ct.image}
-                    alt={ct.name}
-                    fallbackLabel={ct.name}
-                    className="absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <span
-                    className="absolute top-3 left-3 font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full text-ink"
-                    style={{ backgroundColor: ct.color }}
-                  >
-                    {INTENSITY_LABEL[ct.intensity]}
-                  </span>
-                </div>
-                <div className="p-5">
-                  <div className="flex items-baseline justify-between">
-                    <h3 className="font-display font-bold text-2xl">{ct.name}</h3>
-                    <span className="font-mono text-xs text-ash flex items-center gap-1">
-                      <Clock size={11} /> {ct.durationMin}m
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm text-ash leading-relaxed">{ct.description}</p>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+      <div className="border-t hairline">
+        {classTypes.map((ct, i) => (
+          <ClassRow key={ct.id} ct={ct} index={i} />
+        ))}
+        {classTypes.length === 0 &&
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="border-b hairline">
+              <div className="mx-auto max-w-[1600px] px-6 md:px-10 py-14">
+                <div className="h-12 w-64 bg-white/5 animate-pulse" />
+              </div>
+            </div>
+          ))}
       </div>
     </section>
   );
 }
+
+/* ─────────────────────── stats band ─────────────────────── */
+
+const STATS = [
+  { value: '22', label: 'Classes / week' },
+  { value: '45', label: 'Minutes / session' },
+  { value: '04', label: 'Formats' },
+  { value: '16', label: 'Max riders / room' },
+];
+
+function Stats() {
+  return (
+    <section className="border-b hairline">
+      <div className="mx-auto max-w-[1600px] px-6 md:px-10 grid grid-cols-2 lg:grid-cols-4">
+        {STATS.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ delay: i * 0.08, duration: 0.6 }}
+            className={`py-14 md:py-20 px-2 ${i > 0 ? 'lg:border-l hairline' : ''} ${i % 2 === 1 ? 'border-l hairline lg:border-l' : ''}`}
+          >
+            <div className="display text-6xl md:text-8xl">
+              {s.value}
+              <span className="text-volt">.</span>
+            </div>
+            <p className="label text-ash mt-4">{s.label}</p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────── program CTA ─────────────────────── */
 
 function ProgramCTA() {
   return (
-    <section className="relative py-24 overflow-hidden">
-      <Img src={img.wide('program-bg')} alt="" className="absolute inset-0 w-full h-full opacity-25" />
-      <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/40" />
-      <div className="relative z-10 mx-auto max-w-7xl px-5">
-        <div className="max-w-2xl">
-          <p className="label text-volt mb-3 flex items-center gap-2">
-            <Sparkles size={14} /> AI-personalized · Free
-          </p>
-          <h2 className="font-display font-extrabold text-5xl md:text-6xl leading-tight">
-            Your next 12 weeks, <span className="text-volt">engineered.</span>
+    <section className="relative overflow-hidden border-b hairline">
+      <div className="absolute inset-0">
+        <Img
+          src={img.wide('program-bg')}
+          alt=""
+          className="w-full h-full object-cover opacity-20 img-duo"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/90 to-ink/60" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-[1600px] px-6 md:px-10 py-28 md:py-40 grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <p className="label text-volt mb-6">02 — The engine</p>
+          <h2 className="display text-5xl md:text-7xl">
+            Your next
+            <br />
+            12 weeks,
+            <br />
+            <span className="text-outline">engineered.</span>
           </h2>
-          <p className="mt-5 text-ash text-lg leading-relaxed">
-            Tell us your stats, goal and schedule. Our engine computes your calories and macros,
-            builds a periodized 3-month training plan, and our AI coach adds notes written just
-            for you. Takes 60 seconds.
+          <p className="mt-8 text-bone/60 text-lg max-w-md leading-relaxed">
+            Your stats in — a periodized 3-month plan out. Calories, macros, splits, progression,
+            deloads. An AI coach signs off on every brief. Free, 60 seconds.
           </p>
-          <Link to="/program" className="btn-volt mt-8">
-            <Dumbbell size={17} /> Generate my program
+          <Link to="/program" className="btn-volt mt-10">
+            Generate my program
           </Link>
         </div>
+
+        {/* receipt mock */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.7 }}
+          className="justify-self-center lg:justify-self-end w-full max-w-sm"
+        >
+          <div className="bg-coal border hairline p-8 font-mono text-sm shadow-lift rotate-1">
+            <div className="flex justify-between items-baseline pb-4 border-b hairline">
+              <span className="font-bold tracking-[0.2em]">PULSE//ENGINE</span>
+              <span className="text-[10px] text-ash">v2.0</span>
+            </div>
+            {[
+              ['INPUT', 'M · 28Y · 180CM · 84KG'],
+              ['GOAL', 'BUILD MUSCLE'],
+              ['SPLIT', 'UPPER / LOWER — 4D'],
+              ['TDEE', '2,837 KCAL'],
+              ['TARGET', '3,120 KCAL (+10%)'],
+              ['PROTEIN', '168G / DAY'],
+              ['PHASES', 'BASE → BUILD → PEAK'],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4 py-2.5 border-b border-white/5 text-[12px]">
+                <span className="text-ash">{k}</span>
+                <span className="text-bone text-right">{v}</span>
+              </div>
+            ))}
+            <div className="flex justify-between pt-4 text-[12px]">
+              <span className="text-ash">STATUS</span>
+              <span className="text-volt">✓ READY IN 60s</span>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
 }
+
+/* ─────────────────────── coaches — staggered ─────────────────────── */
 
 function Coaches() {
   const { data } = useQuery({ queryKey: ['classes'], queryFn: fetchClasses });
   const instructors = data?.instructors ?? [];
 
   return (
-    <section className="py-24 bg-coal border-y border-steel">
-      <div className="mx-auto max-w-7xl px-5">
-        <p className="label text-volt mb-3">The coaches</p>
-        <h2 className="font-display font-extrabold text-5xl md:text-6xl mb-12">
-          Loud music. Louder standards.
-        </h2>
-        <div className="grid sm:grid-cols-3 gap-6">
+    <section className="border-b hairline">
+      <div className="mx-auto max-w-[1600px] px-6 md:px-10 py-24 md:py-32">
+        <div className="section-head">
+          <div className="flex items-baseline gap-6">
+            <span className="font-mono text-xs text-volt">03</span>
+            <h2 className="display text-4xl md:text-6xl">The coaches</h2>
+          </div>
+          <p className="label text-ash hidden md:block">Loud music. Louder standards.</p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-6 md:gap-10">
           {instructors.map((coach, i) => (
             <motion.div
               key={coach.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="group card overflow-hidden hover:border-volt/50 transition-colors"
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ delay: i * 0.1, duration: 0.7 }}
+              className={`group ${i === 1 ? 'sm:mt-16' : ''}`}
             >
-              <div className="aspect-[4/5] overflow-hidden">
+              <div className="relative overflow-hidden">
                 <Img
                   src={coach.image}
                   alt={coach.name}
                   fallbackLabel={coach.name}
-                  className="w-full h-full grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+                  className="w-full aspect-[3/4] object-cover img-duo transition-transform duration-700 group-hover:scale-[1.03]"
                 />
+                <span className="absolute top-4 left-4 font-mono text-[10px] text-bone/70 tracking-[0.25em]">
+                  0{i + 1}
+                </span>
               </div>
-              <div className="p-5">
-                <h3 className="font-display font-bold text-2xl">{coach.name}</h3>
-                <p className="font-mono text-[11px] uppercase tracking-wider text-volt mt-1">
-                  {coach.specialties.join(' · ')}
-                </p>
-                <p className="mt-3 text-sm text-ash leading-relaxed">{coach.bio}</p>
+              <div className="pt-5 flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="display text-2xl md:text-3xl">{coach.name}</h3>
+                  <p className="label text-volt mt-2">{coach.specialties.join(' / ')}</p>
+                </div>
               </div>
+              <p className="mt-3 text-sm text-ash leading-relaxed max-w-xs">{coach.bio}</p>
             </motion.div>
           ))}
         </div>
@@ -229,110 +412,112 @@ function Coaches() {
   );
 }
 
-function PricingPreview() {
+/* ─────────────────────── pricing — hairline list ─────────────────────── */
+
+function Pricing() {
   const { data } = useQuery({ queryKey: ['plans'], queryFn: fetchPlans });
   const plans = data?.plans ?? [];
 
   return (
-    <section className="py-24 bg-ink bg-grid">
-      <div className="mx-auto max-w-7xl px-5">
-        <div className="text-center mb-12">
-          <p className="label text-volt mb-3">Memberships</p>
-          <h2 className="font-display font-extrabold text-5xl md:text-6xl">Pick your pace.</h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto">
-          {plans.map((p) => (
-            <div
-              key={p.id}
-              className={`card p-6 text-center ${p.featured ? 'border-volt shadow-volt-sm' : ''}`}
-            >
-              {p.featured && <p className="label text-volt mb-2">Most popular</p>}
-              <h3 className="font-display font-bold text-xl">{p.name}</h3>
-              <div className="mt-3">
-                <span className="font-display font-extrabold text-5xl">${p.price}</span>
-                <span className="text-ash font-mono text-xs">{p.cadence}</span>
-              </div>
-              <p className="text-ash text-sm mt-2">{p.tagline}</p>
-            </div>
-          ))}
-        </div>
-        <div className="text-center mt-10">
-          <Link to="/pricing" className="btn-volt">
-            Compare plans <ArrowRight size={16} />
+    <section className="border-b hairline">
+      <div className="mx-auto max-w-[1600px] px-6 md:px-10 py-24 md:py-32">
+        <div className="section-head">
+          <div className="flex items-baseline gap-6">
+            <span className="font-mono text-xs text-volt">04</span>
+            <h2 className="display text-4xl md:text-6xl">Memberships</h2>
+          </div>
+          <Link to="/pricing" className="label text-ash hover:text-volt transition-colors hidden sm:inline-flex items-center gap-2">
+            Compare plans <ArrowUpRight size={13} />
           </Link>
+        </div>
+
+        <div>
+          {plans.map((p) => (
+            <Link
+              key={p.id}
+              to="/pricing"
+              className="group flex items-baseline justify-between gap-6 py-8 md:py-10 border-b hairline last:border-0 hover:pl-3 transition-all duration-300"
+            >
+              <div className="flex items-baseline gap-5 min-w-0">
+                <h3 className="display text-3xl md:text-5xl group-hover:text-volt transition-colors">
+                  {p.name}
+                </h3>
+                {p.featured && (
+                  <span className="hidden sm:inline font-mono text-[10px] uppercase tracking-[0.2em] text-ink bg-volt px-2.5 py-1">
+                    Popular
+                  </span>
+                )}
+              </div>
+              <p className="hidden md:block font-mono text-xs text-ash max-w-[260px] truncate">
+                {p.tagline}
+              </p>
+              <div className="shrink-0 text-right">
+                <span className="display text-3xl md:text-5xl">${p.price}</span>
+                <span className="font-mono text-[11px] text-ash ml-1">{p.cadence}</span>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
+/* ─────────────────────── location ─────────────────────── */
+
 function Location() {
   return (
-    <section className="py-24 bg-ink border-t border-steel">
-      <div className="mx-auto max-w-7xl px-5 grid lg:grid-cols-2 gap-10 items-stretch">
-        <div className="relative min-h-[320px] rounded-2xl overflow-hidden border border-steel">
-          <iframe
-            title="PULSE studio location"
-            src={MAPS_EMBED}
-            className="absolute inset-0 w-full h-full grayscale contrast-110"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+    <section className="relative h-[80vh] min-h-[560px]">
+      <iframe
+        title="PULSE studio location"
+        src={MAPS_EMBED}
+        className="absolute inset-0 w-full h-full grayscale invert-[0.92] contrast-[0.9] opacity-70"
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none bg-gradient-to-t from-ink/60 to-transparent h-40" />
+
+      <div className="absolute left-6 md:left-10 bottom-8 md:bottom-12 bg-ink border hairline p-8 md:p-10 max-w-md shadow-lift">
+        <p className="label text-volt mb-5">05 — The studio</p>
+        <h2 className="display text-4xl md:text-5xl mb-6">
+          Middle of
+          <br />
+          SoHo.
+        </h2>
+        <div className="space-y-3 font-mono text-xs uppercase tracking-[0.15em] text-bone/80">
+          <p>{SITE.address.full}</p>
+          {SITE.hours.map((h) => (
+            <p key={h.days} className="flex justify-between gap-6">
+              <span className="text-ash">{h.days}</span>
+              <span>{h.time}</span>
+            </p>
+          ))}
         </div>
-        <div className="flex flex-col justify-center">
-          <p className="label text-volt mb-3">The studio</p>
-          <h2 className="font-display font-extrabold text-5xl md:text-6xl mb-8">Middle of SoHo.</h2>
-          <div className="space-y-6">
-            <div className="flex gap-4">
-              <MapPin className="text-volt shrink-0 mt-1" size={20} />
-              <div>
-                <p className="label text-ash/60 mb-1">Address</p>
-                <p className="text-bone">{SITE.address.full}</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <Clock className="text-volt shrink-0 mt-1" size={20} />
-              <div className="w-full max-w-xs">
-                <p className="label text-ash/60 mb-2">Hours</p>
-                <table className="w-full font-mono text-sm">
-                  <tbody>
-                    {SITE.hours.map((h) => (
-                      <tr key={h.days} className="border-b border-steel/60">
-                        <td className="py-1.5 text-ash uppercase">{h.days}</td>
-                        <td className="py-1.5 text-volt text-right">{h.time}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <Phone className="text-volt shrink-0 mt-1" size={20} />
-              <div>
-                <p className="label text-ash/60 mb-1">Phone</p>
-                <a href={SITE.phoneHref} className="text-bone hover:text-volt">
-                  {SITE.phone}
-                </a>
-              </div>
-            </div>
-          </div>
-          <a href={MAPS_DIRECTIONS} target="_blank" rel="noreferrer" className="btn-ghost mt-9 self-start">
-            Get directions
-          </a>
-        </div>
+        <a
+          href={MAPS_DIRECTIONS}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-line mt-8 !px-6 !py-3"
+        >
+          Get directions <ArrowUpRight size={13} />
+        </a>
       </div>
     </section>
   );
 }
+
+/* ─────────────────────── page ─────────────────────── */
 
 export default function Home() {
   return (
     <>
       <Hero />
+      <Manifesto />
       <Classes />
+      <Stats />
       <ProgramCTA />
       <Coaches />
-      <PricingPreview />
+      <Pricing />
       <Location />
     </>
   );

@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --ink: #0a0a0b;
-  --coal: #141417;
-  --steel: #26262b;
+  --ink: #070708;
+  --coal: #0e0e10;
+  --steel: #1e1e22;
   --volt: #ccff00;
   --ember: #ff5c2b;
-  --bone: #f4f4f0;
-  --ash: #8a8a92;
+  --bone: #edede8;
+  --ash: #77777f;
 }
 
 @layer base {
@@ -23,26 +23,31 @@
     overflow-x: hidden;
   }
 
+  /* Filmic grain over everything — kills the "flat AI render" look. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
   ::selection {
     background: var(--volt);
     color: var(--ink);
   }
 
-  h1, h2, h3 {
-    @apply font-display;
-  }
-
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
     background: var(--ink);
   }
   ::-webkit-scrollbar-thumb {
     background: var(--steel);
-    border-radius: 6px;
-    border: 2px solid var(--ink);
   }
   ::-webkit-scrollbar-thumb:hover {
     background: var(--volt);
@@ -50,42 +55,63 @@
 }
 
 @layer components {
-  /* mono eyebrow label */
+  /* Technical micro-label */
   .label {
-    @apply font-mono uppercase tracking-[0.22em] text-xs;
+    @apply font-mono uppercase tracking-[0.28em] text-[11px];
   }
 
-  /* volt CTA */
+  /* Expanded athletic display type */
+  .display {
+    @apply font-display font-black uppercase leading-[0.86] tracking-tightest;
+    font-stretch: 118%;
+  }
+
+  /* Primary CTA — pill, mono label inside */
   .btn-volt {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-volt text-ink
-           font-display font-bold text-sm uppercase tracking-wider px-7 py-3.5
-           transition-all duration-200 hover:shadow-volt hover:-translate-y-0.5
-           active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none;
+    @apply inline-flex items-center justify-center gap-2.5 rounded-full bg-volt text-ink
+           font-mono uppercase tracking-[0.18em] text-xs font-bold px-8 py-4
+           transition-all duration-300 hover:shadow-volt
+           active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none;
   }
 
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-steel text-bone
-           font-display font-bold text-sm uppercase tracking-wider px-7 py-3.5
-           transition-all duration-200 hover:border-volt hover:text-volt active:translate-y-px;
+  .btn-line {
+    @apply inline-flex items-center justify-center gap-2.5 rounded-full border border-white/20 text-bone
+           font-mono uppercase tracking-[0.18em] text-xs px-8 py-4
+           transition-all duration-300 hover:border-volt hover:text-volt active:scale-[0.98];
   }
 
-  /* raised card */
+  /* Subtle raised surface (replaces the old heavy card) */
   .card {
-    @apply rounded-2xl bg-coal border border-steel;
+    @apply bg-white/[0.03] border border-white/10 rounded-none;
+  }
+
+  /* Editorial section header row */
+  .section-head {
+    @apply flex items-baseline justify-between gap-6 border-b border-white/10 pb-5 mb-14;
   }
 }
 
 @layer utilities {
-  /* faint grid backdrop for dark sections */
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 56px 56px;
+  .hairline {
+    @apply border-white/10;
   }
 
-  .glow-volt {
-    text-shadow: 0 0 24px rgba(204, 255, 0, 0.5);
+  /* Ultra-subtle blueprint grid for inner pages */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+
+  /* Outlined display text */
+  .text-outline {
+    -webkit-text-stroke: 1.5px var(--bone);
+    color: transparent;
+  }
+  .text-outline-volt {
+    -webkit-text-stroke: 1.5px var(--volt);
+    color: transparent;
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -99,11 +125,21 @@
   .pause-hover:hover * {
     animation-play-state: paused;
   }
+
+  /* Duotone photo treatment */
+  .img-duo {
+    filter: grayscale(1) contrast(1.08) brightness(0.82);
+    transition: filter 0.6s ease;
+  }
+  .group:hover .img-duo,
+  .img-duo:hover {
+    filter: grayscale(0) contrast(1.02) brightness(0.95);
+  }
 }
 
 :focus-visible {
   outline: 2px solid var(--volt);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {

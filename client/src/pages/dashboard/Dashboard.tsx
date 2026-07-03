@@ -69,13 +69,13 @@ export default function Dashboard() {
   const stripeMode = plansData?.stripeConfigured ?? false;
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-ink bg-grid">
-      <div className="mx-auto max-w-4xl px-5">
-        <div className="flex items-start justify-between flex-wrap gap-4 mb-10">
+    <div className="pt-32 pb-28 min-h-screen bg-grid">
+      <div className="mx-auto max-w-4xl px-6">
+        <div className="flex items-start justify-between flex-wrap gap-4 mb-12">
           <div>
-            <p className="label text-volt mb-2">Member dashboard</p>
-            <h1 className="font-display font-extrabold text-4xl md:text-6xl">
-              Hey, {member?.name.split(' ')[0]}.
+            <p className="label text-volt mb-4">Member dashboard</p>
+            <h1 className="display text-5xl md:text-7xl">
+              Hey, {member?.name.split(' ')[0]}<span className="text-volt">.</span>
             </h1>
           </div>
           <button onClick={logout} className="label text-ash hover:text-ember transition-colors">

@@ -494,15 +494,17 @@ export default function Program() {
   } | null>(null);
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-ink bg-grid">
-      <div className="mx-auto max-w-4xl px-5">
-        <p className="label text-volt mb-3 flex items-center gap-2">
-          <Sparkles size={13} /> Free · AI-personalized · 60 seconds
+    <div className="pt-32 pb-28 min-h-screen bg-grid">
+      <div className="mx-auto max-w-4xl px-6">
+        <p className="label text-volt mb-5 flex items-center gap-2">
+          <Sparkles size={12} /> Free · AI-personalized · 60 seconds
         </p>
-        <h1 className="font-display font-extrabold text-5xl md:text-7xl leading-[0.95] mb-4">
-          Your 12-week <span className="text-volt">program.</span>
+        <h1 className="display text-6xl md:text-8xl mb-6">
+          Your 12-week
+          <br />
+          <span className="text-outline">program.</span>
         </h1>
-        <p className="text-ash text-lg max-w-2xl mb-12">
+        <p className="text-ash text-lg max-w-2xl mb-14 leading-relaxed">
           Science-based programming: we compute your energy needs, build a periodized plan around
           your schedule, and an AI coach personalizes the brief.
         </p>

@@ -2,8 +2,8 @@ import { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, forw
 import clsx from 'clsx';
 
 const fieldBase =
-  'w-full rounded-xl bg-ink border border-steel text-bone font-body px-4 py-3 ' +
-  'placeholder:text-ash/60 focus:outline-none focus:border-volt transition-colors';
+  'w-full bg-ink border border-white/15 text-bone font-body px-4 py-3.5 ' +
+  'placeholder:text-ash/50 focus:outline-none focus:border-volt transition-colors';
 
 function Label({ label, htmlFor, required }: { label: string; htmlFor?: string; required?: boolean }) {
   return (

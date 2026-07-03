@@ -37,10 +37,12 @@ export default function Contact() {
   });
 
   return (
-    <div className="pt-28 pb-24 min-h-screen bg-ink bg-grid">
-      <div className="mx-auto max-w-5xl px-5">
-        <p className="label text-volt mb-3">Say hello</p>
-        <h1 className="font-display font-extrabold text-5xl md:text-7xl mb-12">Talk to us.</h1>
+    <div className="pt-32 pb-28 min-h-screen bg-grid">
+      <div className="mx-auto max-w-5xl px-6">
+        <p className="label text-volt mb-5">Say hello</p>
+        <h1 className="display text-6xl md:text-8xl mb-14">
+          Talk to us<span className="text-volt">.</span>
+        </h1>
 
         <div className="grid lg:grid-cols-[1.2fr_1fr] gap-10">
           <form onSubmit={handleSubmit((v) => mutation.mutate(v))} className="card p-6 md:p-8 space-y-5" noValidate>
